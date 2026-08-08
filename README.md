@@ -62,7 +62,6 @@ S3 Bucket → WAR file backup storage
 | **Nexus Repository** | Artifact storage for WAR files (maven2 hosted) |
 | **AWS S3** | WAR file backup storage |
 | **AWS EC2** | Infrastructure for all servers |
-| **Java (OpenJDK 17)** | Runtime environment |
 
 ---
 
