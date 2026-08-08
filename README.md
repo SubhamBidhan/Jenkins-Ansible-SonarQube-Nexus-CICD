@@ -10,10 +10,9 @@ A production-grade, fully automated CI/CD pipeline that integrates **Jenkins, Ma
 |---|---|
 | **Type** | Personal Project |
 | **Domain** | DevOps / CI-CD |
-| **Duration** | 2025 |
+| **Duration** | 2026 |
 | **Developer** | Subham Bidhan Sahoo |
 | **Complexity** | High |
-| **Region** | ap-south-1 (Mumbai) |
 
 ---
 
