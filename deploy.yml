@@ -1,0 +1,8 @@
+---
+- name: Deploy WAR to Tomcat servers
+  hosts: all
+  tasks:
+    - name: Copy WAR file to Tomcat webapps
+      copy:
+        src: /var/lib/jenkins/workspace/project/target/myapp.war
+        dest: /root/tomcat/webapps
