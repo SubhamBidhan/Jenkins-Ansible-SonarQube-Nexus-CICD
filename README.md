@@ -107,7 +107,83 @@ Jenkins-Ansible-CICD/
 ---
 
 ## 🚀 Pipeline Stages
+🔌 Step 1 — Jenkins + Ansible Master Setup
+Launch an EC2 instance (Amazon Linux 2023, t3.small)
+Run jenkins.sh to install Jenkins
+Access Jenkins at http://<EC2_PUBLIC_IP>:8080
+Install the following plugins via Manage Jenkins → Plugins:
+Git Plugin
+Maven Integration
+Ansible Plugin
+SonarQube Scanner
+Sonar Quality Gates
+Nexus Artifact Uploader
+S3 Publisher
+Install Ansible and Python on the same instance
+Configure Ansible hosts file at /etc/ansible/hosts with Tomcat server IPs
+Test connectivity: ansible all -m ping
+Add Ansible path in Jenkins: Manage Jenkins → Tools → Ansible → Path = /bin
+Add Tomcat SSH credentials in Jenkins: Manage Jenkins → Credentials → SSH Username with Private Key → Add PEM file
+🐱 Step 2 — Apache Tomcat Setup on All Nodes
+Launch 3 EC2 instances (Amazon Linux 2023, t2.micro) for Tomcat servers
+Run the Ansible playbook to install Tomcat on all nodes automatically:
+   ansible-playbook ansible/tomcat.yml
 
+See ansible/tomcat.yml for the full playbook. This playbook will:
+
+Download and extract latest Apache Tomcat
+Install Java 17 (Amazon Corretto)
+Configure tomcat-users.xml and context.xml
+Create and enable Tomcat as a systemd service
+Verify Tomcat is running: http://<TOMCAT_IP>:8080
+🔍 Step 3 — SonarQube Setup
+Launch an EC2 instance (Amazon Linux 2023, t2.medium — mandatory)
+Run sonarqube.sh to install SonarQube
+Start SonarQube manually:
+   su - sonar
+   sh /opt/sonarqube-8.9.6.50800/bin/linux-x86-64/sonar.sh start
+Wait 2 minutes for startup, then access: http://<SONAR_IP>:9000
+Default credentials: admin / admin
+Create a new project manually: Add Project → Manually → Set Project Key → Generate Token
+Integrate with Jenkins:
+Add plugin: SonarQube Scanner, Maven Integration, Sonar Quality Gates
+Add credentials: Manage Jenkins → Credentials → Secret Text → Paste Sonar Token
+Configure server: Manage Jenkins → System → SonarQube Servers → Add URL + Token
+Configure scanner: Manage Jenkins → Tools → SonarQube Scanner → Install Automatically
+📦 Step 4 — Nexus Repository Setup
+Launch an EC2 instance (Amazon Linux 2023, t2.medium — mandatory)
+Run NexusAL2.sh to install Nexus
+Access Nexus at: http://<NEXUS_IP>:8081
+Default username: admin
+Get password from: /nexus-data/admin.password
+Create a repository:
+Settings → Repositories → Create Repository → maven2 (hosted)
+Name: hotstarapp
+Version Policy: Snapshot
+Deployment Policy: Allow Redeploy
+Integrate with Jenkins:
+Install plugin: Nexus Artifact Uploader
+Add credentials: Manage Jenkins → Credentials → Username + Password → Nexus admin credentials
+Update Nexus URL and repository name in Jenkinsfile
+☁️ Step 5 — S3 Backup Setup
+Create a private S3 bucket (e.g., subham-tomcat-artifacts)
+Configure AWS credentials in Jenkins:
+Manage Jenkins → System → Amazon S3 Profiles → Add Access Key + Secret Key
+Add Post-build action in Jenkins job:
+Publish artifacts to S3 bucket
+Source: **/*.war
+Destination: your S3 bucket name
+Region: ap-south-1
+🔄 Step 6 — Run the Pipeline
+Create a new Pipeline job in Jenkins
+Point it to the Jenkinsfile in this repository
+Build the pipeline — it will automatically:
+Pull code from GitHub
+Compile and test using Maven
+Analyze code quality with SonarQube
+Upload WAR to Nexus
+Deploy WAR to all Tomcat servers via Ansible
+Verify deployment: http://<TOMCAT_IP>:8080/myapp
 
 ---
 
